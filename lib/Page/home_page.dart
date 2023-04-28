@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
-                    height: 140,
+                    height: 120,
                     width: MediaQuery.of(context).size.width - 30,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColorLight,
@@ -68,7 +68,12 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                editDialog(
+                                    data[index],
+                                    data[index].title.toString(),
+                                    data[index].description.toString());
+                              },
                               icon: const Icon(
                                 Icons.edit,
                                 color: Colors.black,
@@ -108,6 +113,75 @@ class _HomePageState extends State<HomePage> {
   // delete notes
   void delete(NotesModel notesModel) {
     notesModel.delete();
+  }
+
+  // edit notes
+  Future<void> editDialog(
+      NotesModel notesModel, String title, String description) async {
+    titleController.text = title;
+    descriptionController.text = description;
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Edit Memo"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      hintText: "Enter Title",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: descriptionController,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: "Enter Description",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.cancel,
+                  color: Colors.red,
+                  size: 30,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  notesModel.title = titleController.text.toString();
+                  notesModel.description =
+                      descriptionController.text.toString();
+                  notesModel.save();
+                  titleController.clear();
+                  descriptionController.clear();
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.done,
+                  color: Colors.green,
+                  size: 30,
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   Future<void> _showDialogBox() async {
@@ -163,7 +237,6 @@ class _HomePageState extends State<HomePage> {
                   // add data into box
                   box.add(data);
                   data.save();
-                  print(box);
                   titleController.clear();
                   descriptionController.clear();
                   Navigator.pop(context);
