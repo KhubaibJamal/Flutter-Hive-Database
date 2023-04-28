@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hive/Box/box.dart';
+import 'package:flutter_hive/Models/notes_model.dart';
 import 'package:flutter_hive/Widget/card_widget.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,10 +22,75 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          const CardWidget(title: "title", memo: "memo"),
-        ],
+      body: ValueListenableBuilder<Box<NotesModel>>(
+        valueListenable: Boxes.getData().listenable(),
+        builder: ((context, box, _) {
+          var data = box.values.toList().cast<NotesModel>();
+          return ListView.builder(
+            itemCount: box.length,
+            itemBuilder: ((context, index) {
+              return Center(
+                child: Card(
+                  elevation: 1,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Container(
+                    padding: const EdgeInsets.all(15.0),
+                    height: 140,
+                    width: MediaQuery.of(context).size.width - 30,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColorLight,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              data[index].title.toString(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () {
+                                delete(data[index]);
+                              },
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                                size: 30,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.black,
+                                size: 30,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          data[index].description.toString(),
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -35,6 +103,11 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  // delete notes
+  void delete(NotesModel notesModel) {
+    notesModel.delete();
   }
 
   Future<void> _showDialogBox() async {
@@ -58,6 +131,8 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: descriptionController,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
                     decoration: InputDecoration(
                       hintText: "Enter Description",
                       border: OutlineInputBorder(
@@ -81,6 +156,16 @@ class _HomePageState extends State<HomePage> {
               ),
               TextButton(
                 onPressed: () {
+                  final data = NotesModel(
+                      title: titleController.text,
+                      description: descriptionController.text);
+                  final box = Boxes.getData();
+                  // add data into box
+                  box.add(data);
+                  data.save();
+                  print(box);
+                  titleController.clear();
+                  descriptionController.clear();
                   Navigator.pop(context);
                 },
                 child: const Icon(
