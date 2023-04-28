@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hive/Box/box.dart';
 import 'package:flutter_hive/Models/notes_model.dart';
-import 'package:flutter_hive/Widget/card_widget.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class HomePage extends StatefulWidget {
