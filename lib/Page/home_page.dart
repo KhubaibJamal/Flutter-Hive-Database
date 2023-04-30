@@ -13,6 +13,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
